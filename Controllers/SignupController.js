@@ -2,6 +2,7 @@ const SignupModel = require("../Models/SignupModel")
 const passwordValidator = require("password-validator")
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
+const jwt = require('jsonwebtoken')
 
 var schema = new passwordValidator();
 
@@ -59,6 +60,123 @@ const createAccount = async (req, res) => {
     }
 }
 
+const getRecord = async (req, res) => {
+    try {
+        const data = await SignupModel.find()
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: "Record Not Found"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Record Found Successfully",
+            data: data
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
+const getSingleRecord = async (req, res) => {
+    try {
+        const data = await SignupModel.findById(req.params.id)
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: "Record Not Found"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Record Found Successfully",
+            data: data
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
+const deleteRecord = async (req, res) => {
+    try {
+        const data = await SignupModel.findByIdAndDelete(req.params.id)
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: "Record Not Found"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Record Delete Successfully"
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is must required"
+            })
+        }
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is must required"
+            })
+        }
+
+        const exitUser = await SignupModel.findOne({ email: email })
+        if (!exitUser) {
+            return res.status(400).json({
+                success: false,
+                message: "User Not Exits"
+            })
+        }
+        const checkPassword = await bcrypt.compare(password, exitUser.password)
+        if (!checkPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Invaild Password"
+            })
+        }
+
+        const payload = { id: exitUser._id, email: exitUser.email, role: exitUser.role };
+        const secretKey = exitUser.role === 'Admin' ? process.env.JWT_KEY_FOR_ADMIN : process.env.JWT_KEY_FOR_USER;
+        const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+        return res.status(200).json({
+            success: true,
+            message: "Login Successfully",
+            data: exitUser,
+            token: token
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
 module.exports = {
-    createAccount
+    createAccount, getRecord, getSingleRecord, deleteRecord, login
 }
