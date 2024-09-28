@@ -7,15 +7,18 @@ const app = express()
 const cors = require("cors")
 const { connectDatabase } = require("./DB/ConnectDataBase")
 const SignupRouter = require("./Routes/SignupRoutes")
+const officeRouter = require("./Routes/OfficeRouter")
 
 app.use(cors())
 app.use(express.json())
+app.set(express.static("Public"))
 
 app.get("/", (req, res) => {
     res.send("Server Is Running")
 })
 
 app.use("/api", SignupRouter)
+app.use("/api", officeRouter)
 
 
 app.listen(process.env.PORT, () => {
