@@ -13,15 +13,18 @@ const SignupSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    role:{
-        type:String,
-        default:"User"
+    role: {
+        type: String,
+        default: "User"
     },
     password: {
         type: String,
         required: true
+    },
+    otp: {
+        type: String,
     }
-})
+}, { timestamps: true })
 
 const SignupModel = mongoose.model("Signup", SignupSchema)
 
