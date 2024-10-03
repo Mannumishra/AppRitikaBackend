@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const officeSchema = new mongoose.Schema({
+const ResidencySchema = new mongoose.Schema({
     addressTraced: {
         type: String,
         required: true
@@ -14,7 +14,7 @@ const officeSchema = new mongoose.Schema({
     callingResponse: {
         type: String
     },
-    yourLocatation: {
+    lastLocatation: {
         type: String
     },
     otherObservation: {
@@ -23,85 +23,76 @@ const officeSchema = new mongoose.Schema({
     remark: {
         type: String
     },
-    companyExits: {
-        type: String
-    },
     metneighboreFirst: {
         type: String
     },
     metneighboreSecond: {
         type: String
     },
-    confrimationAboutCompany: {
+    detailsharebyneighboore: {
         type: String
     },
-    currentCompanyExitThere: {
+    applicantresiding: {
+        type: String
+    },
+    metPersonname: {
+        type: String
+    },
+    whoisthat: {
+        type: String
+    },
+    applicantresidingconfirmation: {
         type: String
     },
     totalFloor: {
         type: String
     },
-    permissiveExitWhichFloor: {
+    addressExitWhichfloor: {
         type: String
     },
-    landArea: {
+    landarea: {
         type: String
     },
-    localityOfAddress: {
+    localityofaddress: {
         type: String
     },
-    entryAllow: {
+    otherObservation: {
         type: String
     },
-    permissiveExitOnwhichFloor: {
+    relationwithapplicant: {
         type: String
     },
-    nameBoardSeen: {
+    tenureofresidence: {
         type: String
     },
-    meetPersonnameAndDesignationFirst: {
+    ownershipofresidence: {
         type: String
     },
-    meetPersonnameAndDesignationSecond: {
+    rentamount: {
         type: String
     },
-    anyConfirmation: {
+    landlordname: {
         type: String
     },
-    firstColleagueName: {
+    builddescription: {
         type: String
     },
-    secondColleagueName: {
+    applicantresidingwhichfloor: {
         type: String
     },
-    detailsSharedByColleague: {
+    landarea: {
         type: String
     },
-    totalEmployee: {
-        type: Number
-    },
-    seenEmployee: {
-        type: Number
-    },
-    natureOfBusiness: {
+    localityofaddress: {
         type: String
     },
-    setupAndActivity: {
+    documentbymetperson: {
         type: String
     },
-    metPersonName: {
+    totalfamilymember: {
         type: String
     },
-    designation: {
-        type: String
-    },
-    appliciantDesignation: {
-        type: String
-    },
-    tenureOfBusiness: {
-        type: String
-    },
-    idCardShown: {
+    numberofearnrs: {
         type: String
     },
     addressImage: {
@@ -112,6 +103,7 @@ const officeSchema = new mongoose.Schema({
     }
 })
 
-const OfficeModel = mongoose.model("Office", officeSchema)
 
-module.exports = OfficeModel
+const ResidencyModel = mongoose.model("Residency", ResidencySchema)
+
+module.exports = ResidencyModel

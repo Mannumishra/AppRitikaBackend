@@ -1,9 +1,9 @@
-const OfficeModel = require("../Models/ProfileModel");
+const ResidencyModel = require("../Models/ResidenceProfileModel");
 const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
-const fs = require("fs")
+const fs = require("fs");
 
-// Create a new office record
-const createOffice = async (req, res) => {
+// Create a new residency record
+const createResidency = async (req, res) => {
     try {
         // Handling addressImage uploads
         const addressImageUploads = req.files.addressImage
@@ -35,78 +35,79 @@ const createOffice = async (req, res) => {
             : [];
         const uploadedImages = await Promise.all(imageUploads);
 
-        // Create office record with both addressImage and images
-        const officeData = new OfficeModel({
+        // Create residency record with both addressImage and images
+        const residencyData = new ResidencyModel({
             ...req.body,
             addressImage: uploadedAddressImages, // Store addressImage URLs
             images: uploadedImages // Store other image URLs
         });
 
-        const savedOffice = await officeData.save();
+        const savedResidency = await residencyData.save();
         res.status(200).json({
             success: true,
-            message: "Record sent successfully",
-            data: savedOffice
+            message: "Residency record created successfully",
+            data: savedResidency
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-// Get all office records
-const getAllOffices = async (req, res) => {
+// Get all residency records
+const getAllResidencies = async (req, res) => {
     try {
-        const offices = await OfficeModel.find();
-        if (!offices) {
+        const residencies = await ResidencyModel.find();
+        if (!residencies) {
             return res.status(404).json({
                 success: false,
-                message: "Office Not Found"
-            })
+                message: "No Residency records found"
+            });
         }
         res.status(200).json({
             success: true,
-            message: "Office Record found Successfull",
-            data: offices
+            message: "Residency records retrieved successfully",
+            data: residencies
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// Get a single office record by ID
-const getOfficeById = async (req, res) => {
+// Get a single residency record by ID
+const getResidencyById = async (req, res) => {
     try {
-        const office = await OfficeModel.findById(req.params.id);
-        if (!office) {
-            return res.status(404).json({ message: 'Office not found' });
+        const residency = await ResidencyModel.findById(req.params.id);
+        if (!residency) {
+            return res.status(404).json({ message: 'Residency not found' });
         }
         res.status(200).json({
             success: true,
-            message: "Office Record found Successfull",
-            data: office
+            message: "Residency record retrieved successfully",
+            data: residency
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-const updateOffice = async (req, res) => {
+// Update a residency record by ID
+const updateResidency = async (req, res) => {
     try {
-        const office = await OfficeModel.findById(req.params.id);
-        if (!office) {
-            return res.status(404).json({ message: 'Office not found' });
+        const residency = await ResidencyModel.findById(req.params.id);
+        if (!residency) {
+            return res.status(404).json({ message: 'Residency not found' });
         }
 
         // Delete old images from Cloudinary if they exist
-        if (office.addressImage && office.addressImage.length > 0) {
-            for (const image of office.addressImage) {
+        if (residency.addressImage && residency.addressImage.length > 0) {
+            for (const image of residency.addressImage) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
         }
 
-        if (office.images && office.images.length > 0) {
-            for (const image of office.images) {
+        if (residency.images && residency.images.length > 0) {
+            for (const image of residency.images) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
@@ -140,48 +141,48 @@ const updateOffice = async (req, res) => {
             : [];
         const uploadedImages = await Promise.all(imageUploads);
 
-        // Update office record with both new addressImage and images
-        const updatedOffice = await OfficeModel.findByIdAndUpdate(
+        // Update residency record with both new addressImage and images
+        const updatedResidency = await ResidencyModel.findByIdAndUpdate(
             req.params.id,
             {
                 ...req.body,
-                addressImage: uploadedAddressImages.length > 0 ? uploadedAddressImages : office.addressImage,
-                images: uploadedImages.length > 0 ? uploadedImages : office.images,
+                addressImage: uploadedAddressImages.length > 0 ? uploadedAddressImages : residency.addressImage,
+                images: uploadedImages.length > 0 ? uploadedImages : residency.images,
             },
             { new: true }
         );
 
-        res.status(200).json(updatedOffice);
+        res.status(200).json(updatedResidency);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-// Delete an office record by ID
-const deleteOffice = async (req, res) => {
+// Delete a residency record by ID
+const deleteResidency = async (req, res) => {
     try {
-        const office = await OfficeModel.findById(req.params.id);
-        if (!office) {
-            return res.status(404).json({ message: 'Office not found' });
+        const residency = await ResidencyModel.findById(req.params.id);
+        if (!residency) {
+            return res.status(404).json({ message: 'Residency not found' });
         }
 
         // Delete images from Cloudinary
-        if (office.addressImage && office.addressImage.length > 0) {
-            for (const image of office.addressImage) {
+        if (residency.addressImage && residency.addressImage.length > 0) {
+            for (const image of residency.addressImage) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
         }
 
-        if (office.images && office.images.length > 0) {
-            for (const image of office.images) {
+        if (residency.images && residency.images.length > 0) {
+            for (const image of residency.images) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
         }
 
-        // Delete the office record
-        await OfficeModel.findByIdAndDelete(req.params.id);
+        // Delete the residency record
+        await ResidencyModel.findByIdAndDelete(req.params.id);
         res.status(204).json(); // No content to send back
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -190,9 +191,9 @@ const deleteOffice = async (req, res) => {
 
 // Export the controller functions
 module.exports = {
-    createOffice,
-    getAllOffices,
-    getOfficeById,
-    updateOffice,
-    deleteOffice
+    createResidency,
+    getAllResidencies,
+    getResidencyById,
+    updateResidency,
+    deleteResidency
 };
