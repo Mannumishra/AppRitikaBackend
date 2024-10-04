@@ -50,15 +50,6 @@ const ResidencySchema = new mongoose.Schema({
     addressExitWhichfloor: {
         type: String
     },
-    landarea: {
-        type: String
-    },
-    localityofaddress: {
-        type: String
-    },
-    otherObservation: {
-        type: String
-    },
     relationwithapplicant: {
         type: String
     },

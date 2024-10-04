@@ -49,7 +49,8 @@ const createResidency = async (req, res) => {
             data: savedResidency
         });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.log(error)
+        res.status(500).json({ message: error.message });
     }
 };
 
