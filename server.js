@@ -8,6 +8,7 @@ const cors = require("cors")
 const { connectDatabase } = require("./DB/ConnectDataBase")
 const SignupRouter = require("./Routes/SignupRoutes")
 const officeRouter = require("./Routes/OfficeRouter")
+const recidenceRouter = require("./Routes/RecidencyRouter")
 
 app.use(cors())
 app.use(express.json())
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 
 app.use("/api", SignupRouter)
 app.use("/api", officeRouter)
+app.use("/api", recidenceRouter)
 
 
 app.listen(process.env.PORT, () => {

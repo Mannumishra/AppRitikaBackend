@@ -1,4 +1,5 @@
-const { createOffice, getAllOffices } = require("../Controllers/OfficeController")
+
+const { createResidency, getAllResidencies } = require("../Controllers/RecidencyController")
 const upload = require("../Middleware/Multer")
 
 const recidenceRouter = require("express").Router()
@@ -6,8 +7,8 @@ const recidenceRouter = require("express").Router()
 recidenceRouter.post("/send-recidency-record", upload.fields([
     { name: "addressImage", maxCount: 2 },
     { name: "images", maxCount: 4 }
-]), createOffice)
-recidenceRouter.get("/get-recidency-record", getAllOffices)
+]), createResidency)
+recidenceRouter.get("/get-recidency-record", getAllResidencies)
 
 
 
