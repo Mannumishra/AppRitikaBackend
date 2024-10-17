@@ -9,6 +9,11 @@ const { connectDatabase } = require("./DB/ConnectDataBase")
 const SignupRouter = require("./Routes/SignupRoutes")
 const officeRouter = require("./Routes/OfficeRouter")
 const recidenceRouter = require("./Routes/RecidencyRouter")
+const TeamLeaderRouter = require("./Routes/TeamLeaderRoute")
+const TeamRouter = require("./Routes/TeamRoute")
+const BackendRouter = require("./Routes/BackendRoute")
+const FieldRouter = require("./Routes/FieldRoute")
+const TaskRouter = require("./Routes/taskRoutes")
 
 app.use(cors())
 app.use(express.json())
@@ -21,6 +26,11 @@ app.get("/", (req, res) => {
 app.use("/api", SignupRouter)
 app.use("/api", officeRouter)
 app.use("/api", recidenceRouter)
+app.use("/api", TeamLeaderRouter)
+app.use("/api", TeamRouter)
+app.use("/api", BackendRouter)
+app.use("/api", FieldRouter)
+app.use("/api", TaskRouter)
 
 
 app.listen(process.env.PORT, () => {
