@@ -12,35 +12,44 @@ const uploadTasks = async (req, res) => {
 
         const parseDate = (dateValue) => {
             if (typeof dateValue === 'string') {
-                // If the date is a string, assuming it's in dd-mm-yyyy format
-                const [day, month, year] = dateValue.split('-');
-                return new Date(`${year}-${month}-${day}`);
-            } else if (dateValue instanceof Date) {
-                // If the value is already a Date object, return it as-is
                 return dateValue;
+            } else if (dateValue instanceof Date) {
+                const day = String(dateValue.getDate()).padStart(2, '0');
+                const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+                const year = dateValue.getFullYear();
+                return `${day}-${month}-${year}`;
             } else if (typeof dateValue === 'number') {
-                // If the date is a number (Excel date serial), convert it to a JavaScript Date
-                return new Date(Math.round((dateValue - 25569) * 86400 * 1000));
+                const jsDate = new Date(Math.round((dateValue - 25569) * 86400 * 1000));
+                const day = String(jsDate.getDate()).padStart(2, '0');
+                const month = String(jsDate.getMonth() + 1).padStart(2, '0');
+                const year = jsDate.getFullYear();
+                return `${day}-${month}-${year}`;
             } else {
-                // If the format is unexpected, return null or handle the error
-                return null;
+                return 'Invalid Date';
             }
         };
-        
 
         worksheet.eachRow((row, rowNumber) => {
             if (rowNumber > 1) { // Skip the header row
                 const task = {
-                    assignDate: parseDate(row.getCell(2).value), // Assuming the date is in column B in dd-mm-yyyy format
-                    bankName: row.getCell(3).value, // Assuming the bank name is in column C
-                    product: row.getCell(4).value, // Assuming the product is in column D
-                    applicantName: row.getCell(5).value, // Assuming the applicant name is in column E
-                    address: row.getCell(6).value, // Assuming the address is in column F
-                    contactNumber: row.getCell(7).value, // Assuming the contact number is in column G
-                    trigger: row.getCell(8).value, // Assuming the trigger is in column H
-                    verifierNameOrId: row.getCell(9).value, // Assuming verifier name/id is in column I
-                    teamLeaderOrId: row.getCell(10).value // Assuming team leader/id is in column J
+                    assignDate: parseDate(row.getCell(2).value), // Assuming the date is in column B
+                    bankName: row.getCell(3).value || '', // Handle null or undefined
+                    product: row.getCell(4).value || '', // Handle null or undefined
+                    applicantName: row.getCell(5).value || '', // Handle null or undefined
+                    address: row.getCell(6).value || '', // Handle null or undefined
+                    contactNumber: row.getCell(7).value || '', // Handle null or undefined
+                    trigger: row.getCell(8).value || '', // Handle null or undefined
+                    verifierNameOrId: row.getCell(9).value || '', // Handle null or undefined
+                    teamLeaderOrId: row.getCell(10).value || '' // Handle null or undefined
                 };
+
+                // Make sure to trim string values, if they're not null
+                for (const key in task) {
+                    if (typeof task[key] === 'string') {
+                        task[key] = task[key].trim(); // Trim only if it's a string
+                    }
+                }
+
                 tasks.push(task);
             }
         });

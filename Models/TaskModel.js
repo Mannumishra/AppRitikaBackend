@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
     assignDate: {
-        type: Date,
+        type: String,
         required: true,
     },
     bankName: {
