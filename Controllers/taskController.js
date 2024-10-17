@@ -10,10 +10,16 @@ const uploadTasks = async (req, res) => {
 
         const tasks = [];
 
+        // Function to parse the date in dd-mm-yyyy format
+        const parseDate = (dateString) => {
+            const [day, month, year] = dateString.split('-');
+            return new Date(`${year}-${month}-${day}`);
+        };
+
         worksheet.eachRow((row, rowNumber) => {
             if (rowNumber > 1) { // Skip the header row
                 const task = {
-                    assignDate: new Date(row.getCell(2).value), // Assuming the date is in column B
+                    assignDate: parseDate(row.getCell(2).value), // Assuming the date is in column B in dd-mm-yyyy format
                     bankName: row.getCell(3).value, // Assuming the bank name is in column C
                     product: row.getCell(4).value, // Assuming the product is in column D
                     applicantName: row.getCell(5).value, // Assuming the applicant name is in column E
@@ -66,7 +72,6 @@ const uploadTasks = async (req, res) => {
         res.status(500).json({ message: 'Error uploading tasks', error });
     }
 };
-
 
 const getTask = async (req, res) => {
     try {
