@@ -37,6 +37,10 @@ const taskSchema = new mongoose.Schema({
     teamLeaderOrId: {
         type: String,
         required: true,
+    },
+    status: {
+        type: String,
+        default: "Pending",
     }
 }, { timestamps: true });
 

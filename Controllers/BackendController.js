@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const BackendModel = require('../Models/BackendModel');
+const TeamLeader = require('../Models/TeamleaderModel');
+const jwt = require("jsonwebtoken")
 
 
 // Controller function for Backend signup
@@ -102,48 +104,55 @@ const deleteBackend = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const { email, password, role } = req.body;
-
+    const { email, password } = req.body;
+    if (!email) {
+        return res.status(400).json({
+            success: false,
+            message: "Email id must required"
+        })
+    }
+    if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Password is must required"
+        })
+    }
     let user;
-
     try {
-        // Check role and find user in respective collection
-        if (role === 'Backend') {
-            user = await Backend.findOne({ email });
-        } else if (role === 'FieldExcutive') {
-            user = await Field.findOne({ email });
-        } else if (role === 'Team Leader') {
+        user = await BackendModel.findOne({ email });
+        if (!user) {
             user = await TeamLeader.findOne({ email });
-        } else {
-            return res.status(400).json({ message: 'Invalid role' });
         }
-
-        // If user doesn't exist
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
-        // Compare password
         const isMatch = await bcrypt.compare(password, user.password);
-
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Password'
+            });
         }
 
-        // Generate JWT token
+        const jwtSecret = process.env.JWT_KEY_FOR_ADMIN;
         const token = jwt.sign(
             { id: user._id, role: user.role },
-            'your_jwt_secret', // Use env variables for secret in production
-            { expiresIn: '1h' }
+            jwtSecret,
+            { expiresIn: '10000h' }
         );
-
-        res.status(200).json({ token, user });
-
+        res.status(200).json({
+            success: true,
+            message: "Login Successfully",
+            token: token,
+            data: user
+        });
     } catch (error) {
+        console.log(error)
         res.status(500).json({ message: 'Server error', error });
     }
 };
 
+
 module.exports = {
-    signupBacken, getBackends, deleteBackend
+    signupBacken, getBackends, deleteBackend, login
 };
