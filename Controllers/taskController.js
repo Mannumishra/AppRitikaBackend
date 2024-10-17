@@ -10,11 +10,23 @@ const uploadTasks = async (req, res) => {
 
         const tasks = [];
 
-        // Function to parse the date in dd-mm-yyyy format
-        const parseDate = (dateString) => {
-            const [day, month, year] = dateString.split('-');
-            return new Date(`${year}-${month}-${day}`);
+        const parseDate = (dateValue) => {
+            if (typeof dateValue === 'string') {
+                // If the date is a string, assuming it's in dd-mm-yyyy format
+                const [day, month, year] = dateValue.split('-');
+                return new Date(`${year}-${month}-${day}`);
+            } else if (dateValue instanceof Date) {
+                // If the value is already a Date object, return it as-is
+                return dateValue;
+            } else if (typeof dateValue === 'number') {
+                // If the date is a number (Excel date serial), convert it to a JavaScript Date
+                return new Date(Math.round((dateValue - 25569) * 86400 * 1000));
+            } else {
+                // If the format is unexpected, return null or handle the error
+                return null;
+            }
         };
+        
 
         worksheet.eachRow((row, rowNumber) => {
             if (rowNumber > 1) { // Skip the header row
