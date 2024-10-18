@@ -1,57 +1,81 @@
 const OfficeModel = require("../Models/ProfileModel");
-const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
-const fs = require("fs")
+const fs = require("fs");
+const PDFDocument = require("pdfkit");
+const path = require("path");
 
 // Create a new office record
 const createOffice = async (req, res) => {
     try {
-        // Handling addressImage uploads
+        // Upload images (addressImage and images)
         const addressImageUploads = req.files.addressImage
             ? req.files.addressImage.map(async (file) => {
-                const imageUrl = await uploadImage(file.path);
-                // Delete file from local storage after uploading to Cloudinary
-                fs.unlink(file.path, (err) => {
-                    if (err) {
-                        console.error("Error deleting addressImage file:", err);
-                    }
-                });
+                const imageUrl = file.path; // Directly use the file path since we are saving locally
                 return imageUrl;
             })
             : [];
         const uploadedAddressImages = await Promise.all(addressImageUploads);
 
-        // Handling images uploads
         const imageUploads = req.files.images
             ? req.files.images.map(async (file) => {
-                const imageUrl = await uploadImage(file.path);
-                // Delete file from local storage after uploading to Cloudinary
-                fs.unlink(file.path, (err) => {
-                    if (err) {
-                        console.error("Error deleting images file:", err);
-                    }
-                });
+                const imageUrl = file.path; // Directly use the file path since we are saving locally
                 return imageUrl;
             })
             : [];
         const uploadedImages = await Promise.all(imageUploads);
 
-        // Create office record with both addressImage and images
-        const officeData = new OfficeModel({
+        // Create the office data
+        const officeData = {
             ...req.body,
-            addressImage: uploadedAddressImages, // Store addressImage URLs
-            images: uploadedImages // Store other image URLs
+            addressImage: uploadedAddressImages,
+            images: uploadedImages,
+        };
+
+        // Generate PDF from officeData
+        const pdfDoc = new PDFDocument();
+        const pdfFileName = `office_${Date.now()}.pdf`;
+        const pdfPath = path.join(__dirname, "../Public", pdfFileName);
+        console.log("PDF path:", pdfPath); // Debugging: Log PDF path
+        const writeStream = fs.createWriteStream(pdfPath);
+        pdfDoc.pipe(writeStream);
+
+        // Add content to the PDF
+        pdfDoc.fontSize(16).text("Office Data Report", { align: "center" });
+        pdfDoc.moveDown();
+        Object.keys(officeData).forEach((key) => {
+            pdfDoc.fontSize(12).text(`${key}: ${officeData[key]}`, { align: "left" });
         });
 
-        const savedOffice = await officeData.save();
+        pdfDoc.end();
+
+        // Wait for the PDF to be written to disk
+        await new Promise((resolve, reject) => {
+            writeStream.on("finish", resolve);
+            writeStream.on("error", reject);
+        });
+
+        // No need to delete the PDF file since we want to keep it
+
+        // Save the local PDF path (e.g., /Public/office_<timestamp>.pdf) in the database
+        const officeRecord = new OfficeModel({
+            ...officeData,
+            pdfPath: `/Public/${pdfFileName}`, // Save the relative PDF path in the database
+        });
+
+        // Save the office data
+        const savedOffice = await officeRecord.save();
+
         res.status(200).json({
             success: true,
-            message: "Record sent successfully",
-            data: savedOffice
+            message: "Record saved successfully with PDF",
+            data: savedOffice,
         });
     } catch (error) {
+        console.error("Error in createOffice:", error); // Debugging: Log error
         res.status(400).json({ message: error.message });
     }
 };
+
+
 
 // Get all office records
 const getAllOffices = async (req, res) => {

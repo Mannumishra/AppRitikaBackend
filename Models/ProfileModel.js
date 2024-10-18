@@ -109,6 +109,9 @@ const officeSchema = new mongoose.Schema({
     },
     images: {
         type: [String]
+    },
+    pdfPath:{
+        type:String
     }
 })
 

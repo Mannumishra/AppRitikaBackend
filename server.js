@@ -18,6 +18,7 @@ const TaskRouter = require("./Routes/taskRoutes")
 app.use(cors())
 app.use(express.json())
 app.set(express.static("Public"))
+app.use("/Public", express.static("Public"))
 
 app.get("/", (req, res) => {
     res.send("Server Is Running")
