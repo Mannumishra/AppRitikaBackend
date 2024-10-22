@@ -1,12 +1,13 @@
 const ResidencyModel = require("../Models/ResidenceProfileModel");
+const TaskModel = require("../Models/TaskModel");
 const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
 const fs = require("fs");
 
 // Create a new residency record
 const createResidency = async (req, res) => {
     try {
-           // Ensure taskID is provided
-           if (!req.body.taskID) {
+        // Ensure taskID is provided
+        if (!req.body.taskID) {
             return res.status(400).json({ message: "taskID is required" });
         }
 
@@ -48,6 +49,10 @@ const createResidency = async (req, res) => {
         });
 
         const savedResidency = await residencyData.save();
+
+        // Update the task status to "Completed"
+        await TaskModel.findByIdAndUpdate(req.body.taskID, { status: "Draft" });
+
         res.status(200).json({
             success: true,
             message: "Residency record created successfully",

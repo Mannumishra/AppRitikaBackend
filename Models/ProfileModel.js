@@ -114,10 +114,11 @@ const officeSchema = new mongoose.Schema({
     },
     images: {
         type: [String]
-    },
-    pdfPath:{
-        type:String
     }
+    // ,
+    // pdfPath:{
+    //     type:String
+    // }
 })
 
 const OfficeModel = mongoose.model("Office", officeSchema)

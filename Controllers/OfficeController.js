@@ -1,8 +1,9 @@
 const OfficeModel = require("../Models/ProfileModel");
 const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
 const fs = require("fs")
-const PDFDocument = require("pdfkit");
-const path = require("path");
+// const PDFDocument = require("pdfkit");
+// const path = require("path");
+const TaskModel = require("../Models/TaskModel");
 
 // Create a new office record
 const createOffice = async (req, res) => {
@@ -50,15 +51,18 @@ const createOffice = async (req, res) => {
             images: uploadedImages // Store other image URLs
         });
 
-        // Generate PDF from officeData
-        const pdfDoc = new PDFDocument();
-        const pdfFileName = `office_${Date.now()}.pdf`;
-        const pdfPath = path.join(__dirname, "../Public", pdfFileName);
-        console.log("PDF path:", pdfPath); // Debugging: Log PDF path
-        const writeStream = fs.createWriteStream(pdfPath);
-        pdfDoc.pipe(writeStream);
+        // // Generate PDF from officeData
+        // const pdfDoc = new PDFDocument();
+        // const pdfFileName = `office_${Date.now()}.pdf`;
+        // const pdfPath = path.join(__dirname, "../Public", pdfFileName);
+        // console.log("PDF path:", pdfPath); // Debugging: Log PDF path
+        // const writeStream = fs.createWriteStream(pdfPath);
+        // pdfDoc.pipe(writeStream);
 
         const savedOffice = await officeData.save();
+
+        await TaskModel.findByIdAndUpdate(req.body.taskID, { status: "Draft" });
+
         res.status(200).json({
             success: true,
             message: "Record sent successfully",
