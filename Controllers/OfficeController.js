@@ -1,34 +1,48 @@
 const OfficeModel = require("../Models/ProfileModel");
-const fs = require("fs");
+const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
+const fs = require("fs")
 const PDFDocument = require("pdfkit");
 const path = require("path");
 
 // Create a new office record
 const createOffice = async (req, res) => {
     try {
-        // Upload images (addressImage and images)
+        // Handling addressImage uploads
         const addressImageUploads = req.files.addressImage
             ? req.files.addressImage.map(async (file) => {
-                const imageUrl = file.path; // Directly use the file path since we are saving locally
+                const imageUrl = await uploadImage(file.path);
+                // Delete file from local storage after uploading to Cloudinary
+                fs.unlink(file.path, (err) => {
+                    if (err) {
+                        console.error("Error deleting addressImage file:", err);
+                    }
+                });
                 return imageUrl;
             })
             : [];
         const uploadedAddressImages = await Promise.all(addressImageUploads);
 
+        // Handling images uploads
         const imageUploads = req.files.images
             ? req.files.images.map(async (file) => {
-                const imageUrl = file.path; // Directly use the file path since we are saving locally
+                const imageUrl = await uploadImage(file.path);
+                // Delete file from local storage after uploading to Cloudinary
+                fs.unlink(file.path, (err) => {
+                    if (err) {
+                        console.error("Error deleting images file:", err);
+                    }
+                });
                 return imageUrl;
             })
             : [];
         const uploadedImages = await Promise.all(imageUploads);
 
-        // Create the office data
-        const officeData = {
+        // Create office record with both addressImage and images
+        const officeData = new OfficeModel({
             ...req.body,
-            addressImage: uploadedAddressImages,
-            images: uploadedImages,
-        };
+            addressImage: uploadedAddressImages, // Store addressImage URLs
+            images: uploadedImages // Store other image URLs
+        });
 
         // Generate PDF from officeData
         const pdfDoc = new PDFDocument();
@@ -38,44 +52,16 @@ const createOffice = async (req, res) => {
         const writeStream = fs.createWriteStream(pdfPath);
         pdfDoc.pipe(writeStream);
 
-        // Add content to the PDF
-        pdfDoc.fontSize(16).text("Office Data Report", { align: "center" });
-        pdfDoc.moveDown();
-        Object.keys(officeData).forEach((key) => {
-            pdfDoc.fontSize(12).text(`${key}: ${officeData[key]}`, { align: "left" });
-        });
-
-        pdfDoc.end();
-
-        // Wait for the PDF to be written to disk
-        await new Promise((resolve, reject) => {
-            writeStream.on("finish", resolve);
-            writeStream.on("error", reject);
-        });
-
-        // No need to delete the PDF file since we want to keep it
-
-        // Save the local PDF path (e.g., /Public/office_<timestamp>.pdf) in the database
-        const officeRecord = new OfficeModel({
-            ...officeData,
-            pdfPath: `/Public/${pdfFileName}`, // Save the relative PDF path in the database
-        });
-
-        // Save the office data
-        const savedOffice = await officeRecord.save();
-
+        const savedOffice = await officeData.save();
         res.status(200).json({
             success: true,
-            message: "Record saved successfully with PDF",
-            data: savedOffice,
+            message: "Record sent successfully",
+            data: savedOffice
         });
     } catch (error) {
-        console.error("Error in createOffice:", error); // Debugging: Log error
         res.status(400).json({ message: error.message });
     }
 };
-
-
 
 // Get all office records
 const getAllOffices = async (req, res) => {
