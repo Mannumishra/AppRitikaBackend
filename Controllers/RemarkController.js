@@ -58,7 +58,13 @@ const createRemark = async (req, res) => {
 // Get all remarks with dynamic population
 const getAllRemarks = async (req, res) => {
     try {
-        const remarks = await RemarkModel.find().populate('resformId officeformId');
+        const remarks = await RemarkModel.find().populate({
+            path: 'officeformId resformId', // or 'resformId' based on your use case
+            populate: {
+                path: 'taskID', // Populate the taskID field
+                model: 'Task' // Reference the Task model
+            }
+        });;
         if (!remarks || remarks.length === 0) {
             return res.status(404).json({ success: false, message: "No remarks found" });
         }
@@ -74,7 +80,13 @@ const getAllRemarks = async (req, res) => {
 // Get a single remark by ID with dynamic population
 const getRemarkById = async (req, res) => {
     try {
-        const remark = await RemarkModel.findById(req.params.id).populate('resformId officeformId');
+        const remark = await RemarkModel.findById(req.params.id).populate({
+            path: 'officeformId resformId', // or 'resformId' based on your use case
+            populate: {
+                path: 'taskID', // Populate the taskID field
+                model: 'Task' // Reference the Task model
+            }
+        });;
         if (!remark) {
             return res.status(404).json({ message: 'Remark not found' });
         }
