@@ -1,6 +1,6 @@
 const RemarkModel = require("../Models/RemarkModel");
-const { uploadImage, deleteImage } = require("../utils/cloudinaryConfig");
-const fs = require("fs")
+const fs = require("fs");
+const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
 
 // Create a new remark
 const createRemark = async (req, res) => {
