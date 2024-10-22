@@ -117,6 +117,42 @@ const getTask = async (req, res) => {
     }
 }
 
+const updateTask = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract the task id from the request parameters
+
+        // Get updated fields from the request body
+        const updatedTaskData = req.body;
+
+        // Check if task with the given id exists
+        const task = await TaskModel.findById(id);
+        if (!task) {
+            return res.status(404).json({
+                success: false,
+                message: "Task not found",
+            });
+        }
+
+        // Update task fields
+        const updatedTask = await TaskModel.findByIdAndUpdate(id, updatedTaskData, {
+            new: true, // Return the updated task
+            runValidators: true, // Ensure schema validations are applied
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Task updated successfully",
+            data: updatedTask,
+        });
+    } catch (error) {
+        console.error("Error updating task:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error,
+        });
+    }
+};
 module.exports = {
-    uploadTasks, getTask
+    uploadTasks, getTask ,updateTask
 };
