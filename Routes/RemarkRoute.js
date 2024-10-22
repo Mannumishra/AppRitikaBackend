@@ -4,10 +4,10 @@ const { createRemark, getAllRemarks, getRemarkById, updateRemark, deleteRemark }
 const RemarkRouter = express.Router();
 
 
-RemarkRouter.post("/", upload.fields([{ name: 'addressImage', maxCount: 5 }, { name: 'images', maxCount: 5 }]), createRemark);
-RemarkRouter.get("/", getAllRemarks);
-RemarkRouter.get("/:id", getRemarkById);
-RemarkRouter.put("/:id", upload.fields([{ name: 'addressImage', maxCount: 5 }, { name: 'images', maxCount: 5 }]), updateRemark);
-RemarkRouter.delete("/:id", deleteRemark);
+RemarkRouter.post("/upload-remark", upload.fields([{ name: 'addressImage', maxCount: 5 }, { name: 'images', maxCount: 5 }]), createRemark);
+RemarkRouter.get("/get-remark", getAllRemarks);
+RemarkRouter.get("/get-single-remark/:id", getRemarkById);
+RemarkRouter.put("/update-remark/:id", upload.fields([{ name: 'addressImage', maxCount: 5 }, { name: 'images', maxCount: 5 }]), updateRemark);
+RemarkRouter.delete("/delete-remark/:id", deleteRemark);
 
 module.exports = RemarkRouter;
