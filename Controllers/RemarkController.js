@@ -1,16 +1,11 @@
-const ResidencyModel = require("../Models/ResidenceProfileModel");
-const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
-const fs = require("fs");
+const RemarkModel = require("../Models/RemarkModel");
+const { uploadImage, deleteImage } = require("../utils/cloudinaryConfig");
+const fs = require("fs")
 
-// Create a new residency record
-const createResidency = async (req, res) => {
+// Create a new remark
+const createRemark = async (req, res) => {
     try {
-           // Ensure taskID is provided
-           if (!req.body.taskID) {
-            return res.status(400).json({ message: "taskID is required" });
-        }
-
-        // Handling addressImage uploads
+        // Handle addressImage uploads
         const addressImageUploads = req.files.addressImage
             ? req.files.addressImage.map(async (file) => {
                 const imageUrl = await uploadImage(file.path);
@@ -23,9 +18,10 @@ const createResidency = async (req, res) => {
                 return imageUrl;
             })
             : [];
+
         const uploadedAddressImages = await Promise.all(addressImageUploads);
 
-        // Handling images uploads
+        // Handle other images uploads
         const imageUploads = req.files.images
             ? req.files.images.map(async (file) => {
                 const imageUrl = await uploadImage(file.path);
@@ -38,88 +34,83 @@ const createResidency = async (req, res) => {
                 return imageUrl;
             })
             : [];
+
         const uploadedImages = await Promise.all(imageUploads);
 
-        // Create residency record with both addressImage and images
-        const residencyData = new ResidencyModel({
+        // Create a new remark record with both addressImage and images
+        const remarkData = new RemarkModel({
             ...req.body,
             addressImage: uploadedAddressImages, // Store addressImage URLs
             images: uploadedImages // Store other image URLs
         });
 
-        const savedResidency = await residencyData.save();
-        res.status(200).json({
+        const savedRemark = await remarkData.save();
+        res.status(201).json({
             success: true,
-            message: "Residency record created successfully",
-            data: savedResidency
+            message: "Remark created successfully",
+            data: savedRemark
         });
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: error.message });
     }
 };
 
-// Get all residency records
-const getAllResidencies = async (req, res) => {
+// Get all remarks
+const getAllRemarks = async (req, res) => {
     try {
-        const residencies = await ResidencyModel.find();
-        if (!residencies) {
-            return res.status(404).json({
-                success: false,
-                message: "No Residency records found"
-            });
+        const remarks = await RemarkModel.find();
+        if (!remarks || remarks.length === 0) {
+            return res.status(404).json({ success: false, message: "No remarks found" });
         }
         res.status(200).json({
             success: true,
-            message: "Residency records retrieved successfully",
-            data: residencies
+            data: remarks
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// Get a single residency record by ID
-const getResidencyById = async (req, res) => {
+// Get a single remark by ID
+const getRemarkById = async (req, res) => {
     try {
-        const residency = await ResidencyModel.findById(req.params.id);
-        if (!residency) {
-            return res.status(404).json({ message: 'Residency not found' });
+        const remark = await RemarkModel.findById(req.params.id);
+        if (!remark) {
+            return res.status(404).json({ message: 'Remark not found' });
         }
         res.status(200).json({
             success: true,
-            message: "Residency record retrieved successfully",
-            data: residency
+            data: remark
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// Update a residency record by ID
-const updateResidency = async (req, res) => {
+// Update a remark by ID
+const updateRemark = async (req, res) => {
     try {
-        const residency = await ResidencyModel.findById(req.params.id);
-        if (!residency) {
-            return res.status(404).json({ message: 'Residency not found' });
+        const remark = await RemarkModel.findById(req.params.id);
+        if (!remark) {
+            return res.status(404).json({ message: 'Remark not found' });
         }
 
         // Delete old images from Cloudinary if they exist
-        if (residency.addressImage && residency.addressImage.length > 0) {
-            for (const image of residency.addressImage) {
+        if (remark.addressImage && remark.addressImage.length > 0) {
+            for (const image of remark.addressImage) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
         }
 
-        if (residency.images && residency.images.length > 0) {
-            for (const image of residency.images) {
+        if (remark.images && remark.images.length > 0) {
+            for (const image of remark.images) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
         }
 
-        // Handling new addressImage uploads
+        // Handle new addressImage uploads
         const addressImageUploads = req.files.addressImage
             ? req.files.addressImage.map(async (file) => {
                 const imageUrl = await uploadImage(file.path);
@@ -131,9 +122,10 @@ const updateResidency = async (req, res) => {
                 return imageUrl;
             })
             : [];
+
         const uploadedAddressImages = await Promise.all(addressImageUploads);
 
-        // Handling new images uploads
+        // Handle new images uploads
         const imageUploads = req.files.images
             ? req.files.images.map(async (file) => {
                 const imageUrl = await uploadImage(file.path);
@@ -145,51 +137,52 @@ const updateResidency = async (req, res) => {
                 return imageUrl;
             })
             : [];
+
         const uploadedImages = await Promise.all(imageUploads);
 
-        // Update residency record with both new addressImage and images
-        const updatedResidency = await ResidencyModel.findByIdAndUpdate(
+        // Update remark record with new data and images
+        const updatedRemark = await RemarkModel.findByIdAndUpdate(
             req.params.id,
             {
                 ...req.body,
-                addressImage: uploadedAddressImages.length > 0 ? uploadedAddressImages : residency.addressImage,
-                images: uploadedImages.length > 0 ? uploadedImages : residency.images,
+                addressImage: uploadedAddressImages.length > 0 ? uploadedAddressImages : remark.addressImage,
+                images: uploadedImages.length > 0 ? uploadedImages : remark.images
             },
             { new: true }
         );
 
-        res.status(200).json(updatedResidency);
+        res.status(200).json(updatedRemark);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// Delete a residency record by ID
-const deleteResidency = async (req, res) => {
+// Delete a remark by ID
+const deleteRemark = async (req, res) => {
     try {
-        const residency = await ResidencyModel.findById(req.params.id);
-        if (!residency) {
-            return res.status(404).json({ message: 'Residency not found' });
+        const remark = await RemarkModel.findById(req.params.id);
+        if (!remark) {
+            return res.status(404).json({ message: 'Remark not found' });
         }
 
         // Delete images from Cloudinary
-        if (residency.addressImage && residency.addressImage.length > 0) {
-            for (const image of residency.addressImage) {
+        if (remark.addressImage && remark.addressImage.length > 0) {
+            for (const image of remark.addressImage) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
         }
 
-        if (residency.images && residency.images.length > 0) {
-            for (const image of residency.images) {
+        if (remark.images && remark.images.length > 0) {
+            for (const image of remark.images) {
                 const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
                 await deleteImage(publicId);
             }
         }
 
-        // Delete the residency record
-        await ResidencyModel.findByIdAndDelete(req.params.id);
-        res.status(204).json(); // No content to send back
+        // Delete the remark record
+        await RemarkModel.findByIdAndDelete(req.params.id);
+        res.status(204).json({ message: "Remark deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -197,9 +190,9 @@ const deleteResidency = async (req, res) => {
 
 // Export the controller functions
 module.exports = {
-    createResidency,
-    getAllResidencies,
-    getResidencyById,
-    updateResidency,
-    deleteResidency
+    createRemark,
+    getAllRemarks,
+    getRemarkById,
+    updateRemark,
+    deleteRemark
 };

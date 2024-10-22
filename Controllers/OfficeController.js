@@ -7,6 +7,12 @@ const path = require("path");
 // Create a new office record
 const createOffice = async (req, res) => {
     try {
+        if (!req.body.taskID) {
+            return res.status(400).json({
+                success: false,
+                message: "taskID is required"
+            });
+        }
         // Handling addressImage uploads
         const addressImageUploads = req.files.addressImage
             ? req.files.addressImage.map(async (file) => {

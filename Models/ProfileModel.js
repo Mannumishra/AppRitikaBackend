@@ -1,6 +1,11 @@
 const mongoose = require("mongoose")
 
 const officeSchema = new mongoose.Schema({
+    taskID:{
+        type:mongoose.Schema.ObjectId,
+        ref:"Task",
+        required:true
+    },
     addressTraced: {
         type: String,
         required: true
@@ -20,9 +25,9 @@ const officeSchema = new mongoose.Schema({
     otherObservation: {
         type: String
     },
-    remark: {
-        type: String
-    },
+    // remark: {
+    //     type: String
+    // },
     companyExits: {
         type: String
     },
