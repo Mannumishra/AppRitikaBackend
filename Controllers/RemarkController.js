@@ -45,7 +45,7 @@ const createRemark = async (req, res) => {
         });
 
         const savedRemark = await remarkData.save();
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             message: "Remark created successfully",
             data: savedRemark
@@ -55,10 +55,10 @@ const createRemark = async (req, res) => {
     }
 };
 
-// Get all remarks
+// Get all remarks with dynamic population
 const getAllRemarks = async (req, res) => {
     try {
-        const remarks = await RemarkModel.find();
+        const remarks = await RemarkModel.find().populate('resformId officeformId');
         if (!remarks || remarks.length === 0) {
             return res.status(404).json({ success: false, message: "No remarks found" });
         }
@@ -71,10 +71,10 @@ const getAllRemarks = async (req, res) => {
     }
 };
 
-// Get a single remark by ID
+// Get a single remark by ID with dynamic population
 const getRemarkById = async (req, res) => {
     try {
-        const remark = await RemarkModel.findById(req.params.id);
+        const remark = await RemarkModel.findById(req.params.id).populate('resformId officeformId');
         if (!remark) {
             return res.status(404).json({ message: 'Remark not found' });
         }
@@ -95,24 +95,21 @@ const updateRemark = async (req, res) => {
             return res.status(404).json({ message: 'Remark not found' });
         }
 
-        // Delete old images from Cloudinary if they exist
-        if (remark.addressImage && remark.addressImage.length > 0) {
-            for (const image of remark.addressImage) {
-                const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
-                await deleteImage(publicId);
-            }
-        }
-
-        if (remark.images && remark.images.length > 0) {
-            for (const image of remark.images) {
-                const publicId = image.split("/").pop().split(".")[0]; // Extract the public ID
-                await deleteImage(publicId);
-            }
-        }
+        let uploadedAddressImages = remark.addressImage;
+        let uploadedImages = remark.images;
 
         // Handle new addressImage uploads
-        const addressImageUploads = req.files.addressImage
-            ? req.files.addressImage.map(async (file) => {
+        if (req.files && req.files.addressImage && req.files.addressImage.length > 0) {
+            // Delete old addressImage from Cloudinary
+            if (remark.addressImage && remark.addressImage.length > 0) {
+                for (const image of remark.addressImage) {
+                    const publicId = image.split("/").pop().split(".")[0];
+                    await deleteImage(publicId);
+                }
+            }
+
+            // Upload new addressImage
+            const addressImageUploads = req.files.addressImage.map(async (file) => {
                 const imageUrl = await uploadImage(file.path);
                 fs.unlink(file.path, (err) => {
                     if (err) {
@@ -120,14 +117,22 @@ const updateRemark = async (req, res) => {
                     }
                 });
                 return imageUrl;
-            })
-            : [];
-
-        const uploadedAddressImages = await Promise.all(addressImageUploads);
+            });
+            uploadedAddressImages = await Promise.all(addressImageUploads);
+        }
 
         // Handle new images uploads
-        const imageUploads = req.files.images
-            ? req.files.images.map(async (file) => {
+        if (req.files && req.files.images && req.files.images.length > 0) {
+            // Delete old images from Cloudinary
+            if (remark.images && remark.images.length > 0) {
+                for (const image of remark.images) {
+                    const publicId = image.split("/").pop().split(".")[0];
+                    await deleteImage(publicId);
+                }
+            }
+
+            // Upload new images
+            const imageUploads = req.files.images.map(async (file) => {
                 const imageUrl = await uploadImage(file.path);
                 fs.unlink(file.path, (err) => {
                     if (err) {
@@ -135,27 +140,31 @@ const updateRemark = async (req, res) => {
                     }
                 });
                 return imageUrl;
-            })
-            : [];
-
-        const uploadedImages = await Promise.all(imageUploads);
+            });
+            uploadedImages = await Promise.all(imageUploads);
+        }
 
         // Update remark record with new data and images
         const updatedRemark = await RemarkModel.findByIdAndUpdate(
             req.params.id,
             {
                 ...req.body,
-                addressImage: uploadedAddressImages.length > 0 ? uploadedAddressImages : remark.addressImage,
-                images: uploadedImages.length > 0 ? uploadedImages : remark.images
+                addressImage: uploadedAddressImages,
+                images: uploadedImages
             },
             { new: true }
         );
 
-        res.status(200).json(updatedRemark);
+        res.status(200).json({
+            success: true,
+            message: 'Remark updated successfully',
+            data: updatedRemark
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Delete a remark by ID
 const deleteRemark = async (req, res) => {
