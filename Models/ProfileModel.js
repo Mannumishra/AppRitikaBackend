@@ -25,9 +25,9 @@ const officeSchema = new mongoose.Schema({
     otherObservation: {
         type: String
     },
-    // remark: {
-    //     type: String
-    // },
+    remark: {
+        type: String
+    },
     companyExits: {
         type: String
     },

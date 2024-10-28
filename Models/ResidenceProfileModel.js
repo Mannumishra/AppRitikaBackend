@@ -25,9 +25,9 @@ const ResidencySchema = new mongoose.Schema({
     otherObservation: {
         type: String
     },
-    // remark: {
-    //     type: String
-    // },
+    remark: {
+        type: String
+    },
     metneighboreFirst: {
         type: String
     },
