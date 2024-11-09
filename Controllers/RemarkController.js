@@ -1,6 +1,8 @@
 const RemarkModel = require("../Models/RemarkModel");
 const fs = require("fs");
 const { uploadImage, deleteImage } = require("../Utils/cloudinaryConfig");
+const OfficeModel = require("../Models/ProfileModel");
+const ResidencyModel = require("../Models/ResidenceProfileModel");
 
 // Create a new remark
 const createRemark = async (req, res) => {
@@ -55,27 +57,36 @@ const createRemark = async (req, res) => {
     }
 };
 
-// Get all remarks with dynamic population
 const getAllRemarks = async (req, res) => {
     try {
-        const remarks = await RemarkModel.find().populate({
-            path: 'officeformId resformId', // or 'resformId' based on your use case
-            populate: {
-                path: 'taskID', // Populate the taskID field
-                model: 'Task' // Reference the Task model
-            }
-        });;
-        if (!remarks || remarks.length === 0) {
-            return res.status(404).json({ success: false, message: "No remarks found" });
+        // Fetch data from Office and Residency models
+        const offices = await OfficeModel.find().populate({
+            path: 'taskID',
+            model: 'Task'
+        });
+        
+        const residencies = await ResidencyModel.find().populate({
+            path: 'taskID',
+            model: 'Task'
+        });
+
+        // Merge both arrays into a single array
+        const combinedData = [...offices, ...residencies];
+
+        if (combinedData.length === 0) {
+            return res.status(404).json({ success: false, message: "No records found" });
         }
+
         res.status(200).json({
             success: true,
-            data: remarks
+            data: combinedData
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
+
 
 // Get a single remark by ID with dynamic population
 const getRemarkById = async (req, res) => {
