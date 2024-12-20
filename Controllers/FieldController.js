@@ -64,7 +64,7 @@ const signupField = async (req, res) => {
 // Controller function to get all fields
 const getField = async (req, res) => {
     try {
-        const fields = await FieldModel.find().populate('teamLeader');
+        const fields = await FieldModel.find();
         if (!fields) {
             return res.status(404).json({
                 success: false,

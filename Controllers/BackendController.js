@@ -66,7 +66,7 @@ const signupBacken = async (req, res) => {
 // Controller function to get all Backends
 const getBackends = async (req, res) => {
     try {
-        const backends = await BackendModel.find().populate('team');
+        const backends = await BackendModel.find();
         if (!backends) {
             return res.status(404).json({
                 success: false,
