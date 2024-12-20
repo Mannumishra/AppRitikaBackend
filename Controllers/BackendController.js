@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken")
 
 // Controller function for Backend signup
 const signupBacken = async (req, res) => {
-    const { name, email, phoneNumber, team, password, backendId } = req.body;
+    const { name, email, phoneNumber, password, backendId } = req.body;
 
     // Check if all required fields are provided
     if (!name) {
@@ -17,9 +17,6 @@ const signupBacken = async (req, res) => {
     }
     if (!phoneNumber) {
         return res.status(400).json({ message: 'Please fill in the phone number' });
-    }
-    if (!team) {
-        return res.status(400).json({ message: 'Please select a team' });
     }
     if (!password) {
         return res.status(400).json({ message: 'Please fill in the password' });
@@ -54,7 +51,6 @@ const signupBacken = async (req, res) => {
             name,
             email,
             phoneNumber,
-            team,
             backendId,
             password: hashedPassword,
         });

@@ -40,7 +40,6 @@ const uploadTasks = async (req, res) => {
                     contactNumber: row.getCell(7).value || '', // Handle null or undefined
                     trigger: row.getCell(8).value || '', // Handle null or undefined
                     verifierNameOrId: row.getCell(9).value || '', // Handle null or undefined
-                    teamLeaderOrId: row.getCell(10).value || '' // Handle null or undefined
                 };
 
                 // Make sure to trim string values, if they're not null

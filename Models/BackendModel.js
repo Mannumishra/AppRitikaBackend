@@ -9,17 +9,12 @@ const backendSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    backendId:{
+    backendId: {
         type: String,
         required: true,
     },
     phoneNumber: {
         type: String,
-        required: true,
-    },
-    team: {
-        type: mongoose.Schema.ObjectId,
-        ref: "teamName",
         required: true,
     },
     role: {

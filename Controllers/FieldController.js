@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 // Controller function for field signup
 const signupField = async (req, res) => {
-    const { name, email, phoneNumber, teamLeader, password, fieldExcutiveId } = req.body;
+    const { name, email, phoneNumber, password, fieldExcutiveId } = req.body;
 
     // Check if all required fields are provided
     if (!name) {
@@ -16,9 +16,6 @@ const signupField = async (req, res) => {
     }
     if (!phoneNumber) {
         return res.status(400).json({ message: 'Please fill in the phone number' });
-    }
-    if (!teamLeader) {
-        return res.status(400).json({ message: 'Please select a team leader' });
     }
     if (!password) {
         return res.status(400).json({ message: 'Please fill in the password' });
@@ -54,7 +51,6 @@ const signupField = async (req, res) => {
             email,
             phoneNumber,
             fieldExcutiveId,
-            teamLeader,
             password: hashedPassword,
         });
         await newfield.save();
@@ -270,5 +266,5 @@ const resetPassword = async (req, res) => {
     }
 };
 module.exports = {
-    signupField, getField, deleteField, loginField ,sendOtp ,resetPassword ,verifyOtp
+    signupField, getField, deleteField, loginField, sendOtp, resetPassword, verifyOtp
 };

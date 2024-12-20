@@ -17,11 +17,6 @@ const fieldSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    teamLeader: {
-        type: mongoose.Schema.ObjectId,
-        ref: "TeamLeader",
-        required: true,
-    },
     role: {
         type: String,
         default: "FieldExcutive"
