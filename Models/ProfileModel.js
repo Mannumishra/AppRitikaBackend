@@ -114,6 +114,9 @@ const officeSchema = new mongoose.Schema({
     },
     images: {
         type: [String]
+    },
+    latlang:{
+        type:String
     }
     // ,
     // pdfPath:{

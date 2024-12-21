@@ -96,6 +96,9 @@ const ResidencySchema = new mongoose.Schema({
     },
     images: {
         type: [String]
+    },
+    latlang:{
+        type:String
     }
 })
 
