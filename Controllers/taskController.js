@@ -105,13 +105,13 @@ const getTask = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Task Found Successfully",
-            data: tasks
+            data: tasks.reverse()
         })
     } catch (error) {
         console.log(error)
         res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
         })
     }
 }
@@ -152,6 +152,25 @@ const updateTask = async (req, res) => {
         });
     }
 };
+
+const deleteTask = async (req, res) => {
+    try {
+        const data = await TaskModel.findById(req.params.id)
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: "Task Not Found"
+            })
+        }
+        await data.deleteOne()
+        return res.status(200).json({
+            success: true,
+            message: "Task Delete Successfully"
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
 module.exports = {
-    uploadTasks, getTask ,updateTask
+    uploadTasks, getTask, updateTask, deleteTask
 };
